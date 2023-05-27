@@ -1,26 +1,28 @@
 const express = require("express");
-const axios = require('axios');
+const { Configuration, OpenAIApi } = require("openai");
 
 const app = express();
 
-const apiUrl = "https://api.openai.com/v1/chat/completions";
 const PORT = 3000; 
 
+
 const getResponsePrompt = async (prompt, apiKey)=>{
-    try{
-        const response = await axios.post(apiUrl, {
-            messages: [{role: 'Sistema', content: 'Tu eres un asistente virtual con el apodo de Hihand'},{role: 'Usuario', content: prompt}]
-        },
-        {
-            headers: {
-                "Authorization": `Bearer ${apiKey}`,
-                "Content-Type": 'application.json', 
-            },
-        });
-        return response.data.choices[0].message.content;
-    }catch(err){
-        return "Error al realizar la consulta";
-    }
+    const configuration = new Configuration({
+        apiKey: apiKey,
+    })
+
+    const openai = new OpenAIApi(configuration);
+    const response = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: `Human: ${prompt} AI: `,
+        temperature: 0.9,
+        max_tokens: 150,
+        top_p: 1,
+        frequency_penalty: 0.0,
+        presence_penalty: 0.6,
+        stop: [" Human:", " AI:"],
+    })
+    return response.data.choices[0].text;
 }
 
 app.get("/chatOpenHihand", async(req, res) => {
@@ -29,7 +31,8 @@ app.get("/chatOpenHihand", async(req, res) => {
 
     try{
         const resp = await getResponsePrompt(prompt, apiKey);
-        res.json({response: resp})
+        console.log(resp);
+        res.json(resp);
     }catch (err){
         res.json({response: "Error al realizar la consulta"});
     }
