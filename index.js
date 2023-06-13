@@ -3,7 +3,7 @@ const { Configuration, OpenAIApi } = require("openai");
 
 const app = express();
 
-const PORT = 3000; 
+const PORT = process.env.PORT || 3000; 
 
 
 const getResponsePrompt = async (prompt, apiKey)=>{
@@ -14,13 +14,13 @@ const getResponsePrompt = async (prompt, apiKey)=>{
     const openai = new OpenAIApi(configuration);
     const response = await openai.createCompletion({
         model: "text-davinci-003",
-        prompt: `Human: ${prompt} AI: `,
+        prompt: `Human: ${prompt} AIHAND: `,
         temperature: 0.9,
         max_tokens: 150,
         top_p: 1,
         frequency_penalty: 0.0,
         presence_penalty: 0.6,
-        stop: [" Human:", " AI:"],
+        stop: [" Human:", " AIHAND:"],
     })
     return response.data.choices[0].text;
 }
